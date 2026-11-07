@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تحويل TXT إلى PDF</title>
+  <style>
+    body {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      font-family: Arial, sans-serif;
+      color: #222;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 6px;
+      background: #1769e0;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+
+    #status {
+      color: #555;
+    }
+
+    #preview {
+      min-height: 300px;
+      padding: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: 16px/1.7 Arial, sans-serif;
+    }
+
+    @page {
+      margin: 20mm;
+    }
+
+    @media print {
+      body {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .controls,
+      h1,
+      #status {
+        display: none !important;
+      }
+
+      #preview {
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>تحويل ملف TXT إلى PDF</h1>
+
+  <div class="controls">
+    <input id="fileInput" type="file" accept=".txt,text/plain">
+    <button id="printButton" type="button" disabled>
+      طباعة / حفظ PDF
+    </button>
+  </div>
+
+  <p id="status">اختر ملف TXT للبدء.</p>
+  <pre id="preview"></pre>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const printButton = document.getElementById("printButton");
+    const preview = document.getElementById("preview");
+    const status = document.getElementById("status");
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0];
+
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        preview.textContent = reader.result;
+        status.textContent = `تم تحميل: ${file.name}`;
+        printButton.disabled = false;
+      };
+
+      reader.onerror = () => {
+        status.textContent = "تعذّر قراءة الملف. حاول اختيار ملف آخر.";
+        printButton.disabled = true;
+      };
+
+      reader.readAsText(file);
+    });
+
+    printButton.addEventListener("click", () => {
+      window.print();
+    });
+  </script>
+</body>
+</html>
