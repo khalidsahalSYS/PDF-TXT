@@ -3,123 +3,219 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="حوّل ملفات TXT إلى PDF بسهولة، مع دعم عدة ملفات وتنسيق عربي مناسب للطباعة.">
   <title>تحويل TXT إلى PDF</title>
   <style>
-    body {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 20px;
-      font-family: Arial, sans-serif;
-      color: #222;
+    :root {
+      color-scheme: light;
+      font-family: Tahoma, Arial, sans-serif;
+      color: #172033;
+      background: #f3f6fb;
     }
 
-    .controls {
+    * { box-sizing: border-box; }
+
+    body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e1e7f0;
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 12px 35px rgb(25 45 80 / 8%);
+    }
+
+    h1 { margin: 0 0 10px; font-size: clamp(24px, 4vw, 34px); }
+    .intro, .hint { color: #596579; line-height: 1.8; }
+
+    .picker {
+      display: block;
+      margin: 22px 0 14px;
+      padding: 22px;
+      text-align: center;
+      border: 2px dashed #9bb9ee;
+      border-radius: 12px;
+      background: #f8faff;
+    }
+
+    input[type="file"] { max-width: 100%; }
+
+    .actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 20px;
+      gap: 10px;
+      margin: 16px 0;
     }
 
     button {
-      padding: 10px 16px;
       border: 0;
-      border-radius: 6px;
-      background: #1769e0;
-      color: white;
-      font-size: 16px;
+      border-radius: 9px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 700;
       cursor: pointer;
     }
 
-    button:disabled {
-      background: #999;
-      cursor: not-allowed;
+    #downloadButton { color: #fff; background: #1769e0; }
+    #clearButton { color: #263248; background: #e9eef6; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    #status { min-height: 1.5em; color: #46536a; }
+
+    #documents { display: grid; gap: 18px; margin-top: 20px; }
+
+    .document {
+      overflow: hidden;
+      border: 1px solid #e1e7f0;
+      border-radius: 12px;
+      background: #fff;
     }
 
-    #status {
-      color: #555;
+    .document h2 {
+      margin: 0;
+      padding: 12px 16px;
+      color: #174a91;
+      background: #f1f6ff;
+      font-size: 17px;
+      overflow-wrap: anywhere;
     }
 
-    #preview {
-      min-height: 300px;
-      padding: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    .document pre {
+      margin: 0;
+      padding: 18px;
+      min-height: 80px;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
-      font: 16px/1.7 Arial, sans-serif;
+      tab-size: 4;
+      font: 15px/1.9 Tahoma, Arial, sans-serif;
+      direction: auto;
+      text-align: start;
     }
 
-    @page {
-      margin: 20mm;
-    }
+    @page { size: A4; margin: 18mm; }
 
     @media print {
-      body {
-        max-width: none;
-        margin: 0;
-        padding: 0;
+      :root { background: #fff; }
+      body { max-width: none; padding: 0; }
+      .card { padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+      .no-print, .document:first-child h2 { display: none !important; }
+      #documents { display: block; margin: 0; }
+      .document { border: 0; border-radius: 0; break-after: page; }
+      .document:last-child { break-after: auto; }
+      .document h2 {
+        display: block !important;
+        padding: 0 0 10px;
+        color: #111;
+        background: transparent;
+        border-bottom: 1px solid #aaa;
       }
-
-      .controls,
-      h1,
-      #status {
-        display: none !important;
-      }
-
-      #preview {
-        min-height: 0;
-        padding: 0;
-        border: 0;
-        border-radius: 0;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-      }
+      .document pre { padding: 12px 0; font-size: 12pt; line-height: 1.8; }
     }
   </style>
 </head>
 <body>
-  <h1>تحويل ملف TXT إلى PDF</h1>
+  <main class="card">
+    <section class="no-print">
+      <h1>تحويل ملفات TXT إلى PDF</h1>
+      <p class="intro">اختر ملفًا نصيًا واحدًا أو عدة ملفات. ستُجمع الملفات في مستند واحد، مع عنوان مستقل لكل ملف وتنسيق مناسب للطباعة.</p>
 
-  <div class="controls">
-    <input id="fileInput" type="file" accept=".txt,text/plain">
-    <button id="printButton" type="button" disabled>
-      طباعة / حفظ PDF
-    </button>
-  </div>
+      <label class="picker" for="fileInput">
+        <strong>اختر ملفات TXT من جهازك</strong><br>
+        <span class="hint">يمكنك تحديد عدة ملفات دفعة واحدة</span><br><br>
+        <input id="fileInput" type="file" accept=".txt,text/plain" multiple>
+      </label>
 
-  <p id="status">اختر ملف TXT للبدء.</p>
-  <pre id="preview"></pre>
+      <div class="actions">
+        <button id="downloadButton" type="button" disabled>تحميل PDF</button>
+        <button id="clearButton" type="button" disabled>مسح الملفات</button>
+      </div>
+      <p id="status" role="status" aria-live="polite">لم يتم اختيار ملفات بعد.</p>
+      <p class="hint">عند الضغط على «تحميل PDF»، اختر «حفظ كملف PDF» في نافذة الطباعة. إنشاء PDF يتم عبر المتصفح، بدون مكتبات أو رفع ملفات إلى الإنترنت.</p>
+    </section>
+
+    <section id="documents" aria-label="معاينة الملفات النصية"></section>
+  </main>
 
   <script>
     const fileInput = document.getElementById("fileInput");
-    const printButton = document.getElementById("printButton");
-    const preview = document.getElementById("preview");
+    const downloadButton = document.getElementById("downloadButton");
+    const clearButton = document.getElementById("clearButton");
+    const documents = document.getElementById("documents");
     const status = document.getElementById("status");
+    let loadedCount = 0;
 
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files[0];
+    function updateButtons() {
+      const hasDocuments = loadedCount > 0;
+      downloadButton.disabled = !hasDocuments;
+      clearButton.disabled = !hasDocuments;
+    }
 
-      if (!file) return;
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ name: file.name, text: String(reader.result ?? "") });
+        reader.onerror = () => reject(new Error(file.name));
+        reader.readAsText(file, "UTF-8");
+      });
+    }
 
-      const reader = new FileReader();
+    function addDocument(name, text) {
+      const article = document.createElement("article");
+      article.className = "document";
 
-      reader.onload = () => {
-        preview.textContent = reader.result;
-        status.textContent = `تم تحميل: ${file.name}`;
-        printButton.disabled = false;
-      };
+      const heading = document.createElement("h2");
+      heading.textContent = name;
 
-      reader.onerror = () => {
-        status.textContent = "تعذّر قراءة الملف. حاول اختيار ملف آخر.";
-        printButton.disabled = true;
-      };
+      const content = document.createElement("pre");
+      content.textContent = text || "(الملف فارغ)";
+      content.dir = "auto";
 
-      reader.readAsText(file);
+      article.append(heading, content);
+      documents.appendChild(article);
+    }
+
+    fileInput.addEventListener("change", async () => {
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) return;
+
+      status.textContent = `جارٍ قراءة ${files.length} ملف...`;
+      fileInput.disabled = true;
+
+      const results = await Promise.allSettled(files.map(readFile));
+      let added = 0;
+      let failed = 0;
+
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          addDocument(result.value.name, result.value.text);
+          added++;
+        } else {
+          failed++;
+        }
+      }
+
+      loadedCount += added;
+      status.textContent = failed
+        ? `تم تحميل ${added} ملف، وتعذرت قراءة ${failed} ملف.`
+        : `تم تحميل ${added} ملف بنجاح. يمكنك اختيار ملفات إضافية أيضًا.`;
+      fileInput.disabled = false;
+      fileInput.value = "";
+      updateButtons();
     });
 
-    printButton.addEventListener("click", () => {
+    downloadButton.addEventListener("click", () => {
+      if (!loadedCount) return;
       window.print();
+    });
+
+    clearButton.addEventListener("click", () => {
+      documents.replaceChildren();
+      loadedCount = 0;
+      status.textContent = "تم مسح الملفات. اختر ملفات TXT للبدء.";
+      updateButtons();
     });
   </script>
 </body>
